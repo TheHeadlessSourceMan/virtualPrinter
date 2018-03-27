@@ -1,0 +1,1 @@
+This library allows you to easily create a windows virtual printer.
