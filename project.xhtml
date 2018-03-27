@@ -1,0 +1,66 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html  PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN'  'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>virtualPrinter</title>
+<style type="text/css">
+	.filename {font-weight:bold}
+	subproject {display:list-item}
+	python, .python {display:none}
+	h2 {font-size:150%;font-weight:bold;border-bottom:1px solid black;width:100%}
+	.expanded:before {color:green;content:'\25BC';font-size:10px;width:21px;cursor:pointer;border:3px outset #99ff99;background:#99ff99}
+	description {display:block}
+	.childarea {margin-left:7px;padding-left:7px;border-left:3px ridge #99ff99;padding-top:0px}
+	h1, name {display:block;font-size:200%;font-weight:bold;border-bottom:2px solid black;width:100%}
+	.indent, files {display:block;margin-right:1.5cm;margin-left:1.5cm}
+	.shrunken:before {color:green;content:'\25BA';font-size:10px;width:21px;cursor:pointer;border:3px outset #99ff99;background:#99ff99}
+	filename {font-weight:bold}
+	.all {background:#bbffaa}
+	.partial {background:#fff088}
+	.none {background:#ffaaaa}
+</style>
+<script language="JavaScript" type="text/javascript">
+function showHide(node,shouldShow) {
+	var show=null;
+	var twirlie=node.childNodes[0]
+	if(twirlie.getAttribute('class')=='expanded'&amp;&amp;(shouldShow==null||shouldShow==0)) {
+		show=0;
+		twirlie.setAttribute('class','shrunken');
+	} else if(twirlie.getAttribute('class')=='shrunken'&amp;&amp;(shouldShow==null||shouldShow==1)) {
+		show=1;
+		twirlie.setAttribute('class','expanded');
+	}
+	if(show!=null) {
+		var i;
+		for(i=2;i&lt;node.childNodes.length;i++) {
+			var e=node.childNodes[i];
+			if(e.nodeType!=1) {
+				// Do nothing. Only interested in elements.
+			} else if(show) {
+				e.setAttribute('style',e.getAttribute('oldStyle'));
+			} else {
+				e.setAttribute('oldStyle',e.getAttribute('style'));
+				e.setAttribute('style','display:none');
+			}
+		}
+	}
+}
+</script></head>
+<body class="indent">
+<name>virtualPrinter</name>
+<description>
+This library allows you to create and register a virtual printer using python to process anything the user prints
+</description>
+
+<h2>Status:</h2>
+<div class='indent'>
+		<li>Newly-created 2017-08-23 11:50:53.631000</li>
+</div>
+
+<h2>TODO:</h2>
+<div class='indent'>
+		<li>Need to figure out custom/infinite paper sizes.</li>
+</div>
+
+</body>
+</html>
