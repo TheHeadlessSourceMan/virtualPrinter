@@ -27,7 +27,6 @@ if __name__ == '__main__':
 	}
 	package_dir={name:here}
 	distclass=BinaryDistribution
-<<<<<<< HEAD
 	setup(
 		name=name,
 		version=version,
@@ -41,6 +40,3 @@ if __name__ == '__main__':
 		package_dir=package_dir,
 		package_data=package_data,
 		distclass=distclass)
-=======
-	setup(name=name,version=version,description=description,packages=packages,package_dir=package_dir,package_data=package_data,distclass=distclass)
->>>>>>> 13cf77a6e8475f488e1d884f4ef6ee0bda4ad3aa
