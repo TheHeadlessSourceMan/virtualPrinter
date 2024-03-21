@@ -1,1 +1,11 @@
+# virtualPrinter
+
 This library allows you to easily create a windows virtual printer.
+
+## Theory of Operation
+
+1. Open a TCP server on a (loopback) adapter
+2. Tell Windows to install a PostScript network printer that lives at that address:port
+3. Whenever a print job comes in on that network port, call commandline GhostScript (required) to convert the PostScript into a PDF (works great, since the two formats are closely related)
+4. Use PIL to read that PDF into an image
+5. User code gets passed a normal, everyday, PIL image, plus some meta info (title,user,etc) gleaned from the original PostScript
