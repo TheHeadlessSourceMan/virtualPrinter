@@ -2,6 +2,12 @@
 
 This library allows you to easily create a windows virtual printer.
 
+## How to use
+ * Simply create a ```Printer('my printer name',acceptsFormat='png')``` object, and implement its ```printThis(doc,title=None,author=None,filename=None)``` method.
+   * It should show up in your list of windows printers.
+   * Every print job ultimately calls your ```printThis()``` with a new doc in the ```acceptsFormat``` format
+ * see the [examples](./examples) directory for details
+
 ## Theory of Operation
 
 1. Open a TCP server on a (loopback) adapter
