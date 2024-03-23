@@ -42,6 +42,7 @@ class MyPrinter(Printer):
             filename based on this (foo.html -> foo.pdf)
         """
         import tkinter as tk
+        from tkinter import filedialog
         tk.Tk().withdraw() # prevent a blank application window
         filetypes=(
             ("PNG Files",'*.png'),
@@ -56,7 +57,7 @@ class MyPrinter(Printer):
             initialdir=originPathFilename[0]
         else:
             initialdir=None
-        val=tk.filedialog.asksaveasfilename(confirmoverwrite=True,
+        val=filedialog.asksaveasfilename(confirmoverwrite=True,
             title='Save As...',defaultextension='.png',filetypes=filetypes,
             initialfile=initialfile,initialdir=initialdir)
         if val is not None and val.strip()!='':

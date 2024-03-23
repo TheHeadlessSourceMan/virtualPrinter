@@ -13,6 +13,8 @@ import socket
 import atexit
 import select
 
+from virtualPrinter.windowsPrinters import WindowsPrinters
+
 PrintCallbackDocType=typing.Any
 
 PrintCallbackFunctionType=typing.Callable[[
@@ -35,7 +37,7 @@ class PrintServer:
         printerName:str='My Virtual Printer',
         ip:str='127.0.0.1',port:int=9001,
         autoInstallPrinter:bool=True,
-        printCallbackFn:bool=None):
+        printCallbackFn:typing.Optional[PrintCallbackFunctionType]=None):
         """
         You can do an ip other than 127.0.0.1 (localhost), but really
         a better way is to install the printer and use windows sharing.
@@ -59,9 +61,10 @@ class PrintServer:
         self.printerName:str=printerName
         self.running:bool=False
         self.keepGoing:bool=False
-        self.osPrinterManager:int=None
+        self.osPrinterManager:typing.Optional[WindowsPrinters]=None
         self.printerPortName:typing.Optional[str]=None
-        self.printCallbackFn=printCallbackFn
+        self.printCallbackFn:typing.Optional[
+            PrintCallbackFunctionType]=printCallbackFn
 
     def __del__(self):
         """
@@ -79,7 +82,6 @@ class PrintServer:
         atexit.register(self.__del__) # ensure that __del__ always
         #                               gets called when the program exits
         if os.name=='nt':
-            from .windowsPrinters import WindowsPrinters
             self.osPrinterManager=WindowsPrinters()
             self.printerPortName=self.printerName+' Port'
             makeDefault=False
@@ -114,6 +116,7 @@ class PrintServer:
         #sock.setblocking(0)
         sock.listen(1)
         newWay=True
+        buf:typing.List[str]
         while self.keepGoing:
             print('\nListening for incoming print job...')
             while self.keepGoing: # let select() yield some time to this thread
@@ -133,24 +136,25 @@ class PrintServer:
             if self.printCallbackFn is None:
                 with open('I_printed_this.ps','wb') as f:
                     while True:
-                        data=conn.recv(self.buffersize)
-                        if not data:
+                        raw=conn.recv(self.buffersize)
+                        if not raw:
                             break
-                        f.write(data)
+                        f.write(raw)
                         f.flush()
             elif newWay:
                 buf=[]
                 while True:
-                    data=str(conn.recv(self.buffersize))
-                    if not data:
+                    raw=conn.recv(self.buffersize)
+                    if not raw:
                         break
+                    data=raw.decode('utf-8',errors='ignore')
                     buf.append(data)
-                buf=''.join(buf)
+                combinedBuf=''.join(buf)
                 # get whatever meta info we can
                 author=None
                 title=None
                 filename=None
-                header='@'+buf.split('%!PS-',1)[0].split('@',1)[1]
+                header='@'+combinedBuf.split('%!PS-',1)[0].split('@',1)[1]
                 #print header
                 for line in header.split('\n'):
                     line=line.strip()
@@ -161,32 +165,32 @@ class PrintServer:
                         else:
                             title=n
                     elif line.startswith('@PJL COMMENT'):
-                        line=line.split('"',1)[1].rsplit('"',1)[0].split(';')
-                        for param in line:
-                            param=param.split(':',1)
-                            if len(param)>1:
-                                param[0]=param[0].strip().lower()
-                                param[1]=param[1].strip()
-                                if param[0]=='username':
-                                    author=param[1]
-                                elif param[0]=='app filename':
+                        params=line.split('"',1)[1].rsplit('"',1)[0].split(';')
+                        for param in params:
+                            kv=param.split(':',1)
+                            if len(kv)>1:
+                                kv[0]=kv[0].strip().lower()
+                                kv[1]=kv[1].strip()
+                                if kv[0]=='username':
+                                    author=kv[1]
+                                elif kv[0]=='app filename':
                                     if title is None:
-                                        if os.path.isfile(param[1]):
-                                            filename=param[1]
+                                        if os.path.isfile(kv[1]):
+                                            filename=kv[1]
                                         else:
-                                            title=param[1]
+                                            title=kv[1]
                 if title is None and filename is not None:
                     title=filename.rsplit(os.sep,1)[-1].split('.',1)[0]
-                self.printCallbackFn(
-                    buf,title=title,author=author,filename=filename)
+                self.printCallbackFn(buf,title,author,filename)
             else:
                 buf=[]
                 printjobHeader=[]
                 fillingBuf=False
                 while True:
-                    data=str(conn.recv(self.buffersize))
-                    if not data:
+                    raw=conn.recv(self.buffersize)
+                    if not raw:
                         break
+                    data=raw.decode('utf-8',errors='ignore')
                     if not fillingBuf:
                         i=data.find('%!PS-')
                         if i<0:
@@ -201,7 +205,7 @@ class PrintServer:
                     else:
                         buf.append(data)
                 if buf:
-                    self.printCallbackFn(''.join(buf))
+                    self.printCallbackFn(''.join(buf),None,None,None)
             conn.close()
             time.sleep(0.1)
 
@@ -213,5 +217,5 @@ if __name__=='__main__':
     runit=True
     for arg in sys.argv[1:]:
         pass # TODO: do args
-    ps=PrintServer(ip, port)
+    ps=PrintServer(ip=ip,port=port)
     ps.run()
