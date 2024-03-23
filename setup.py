@@ -7,6 +7,7 @@ for more info on how this works, see:
     and/or
     http://pythonwheels.com
 """
+import typing
 from setuptools import setup, Distribution # type: ignore
 
 
@@ -31,7 +32,7 @@ if __name__ == '__main__':
     description="""This library allows you to create and register
         a virtual printer using python to process anything the user prints"""
     packages=[name]
-    package_data={ # add all files for a package
+    package_data:typing.Dict={ # add all files for a package
         name:[]
     }
     package_dir={name:here}

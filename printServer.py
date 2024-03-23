@@ -35,7 +35,7 @@ class PrintServer:
 
     def __init__(self,
         printerName:str='My Virtual Printer',
-        ip:str='127.0.0.1',port:int=9001,
+        ip:str='127.0.0.1',port:typing.Union[None,int,str]=None,
         autoInstallPrinter:bool=True,
         printCallbackFn:typing.Optional[PrintCallbackFunctionType]=None):
         """
@@ -55,7 +55,7 @@ class PrintServer:
         self.ip:str=ip
         if port is None:
             port=0 # meaning, "any unused port"
-        self.port:int=port
+        self.port:int=int(port)
         self.buffersize:int=20  # Normally 1024, but we want fast response
         self.autoInstallPrinter:bool=autoInstallPrinter
         self.printerName:str=printerName

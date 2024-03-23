@@ -89,7 +89,7 @@ class WindowsPrinters:
 
     def addPrinter(self,
         name:str,
-        host:str='127.0.0.1',port:int=9101,
+        host:str='127.0.0.1',port:typing.Union[int,str]=9101,
         printerPortName:typing.Optional[str]=None,
         makeDefault:bool=False,
         comment:typing.Optional[str]=None

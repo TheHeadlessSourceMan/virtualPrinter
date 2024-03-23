@@ -24,14 +24,15 @@ if os.name=='nt':
         ):
         if os.path.isdir(gsDir):
             # find the newest version
-            bestVersion=0
+            bestVersion:float=0.0
+            val:float
             for f in os.listdir(gsDir):
                 path=gsDir+os.sep+f
                 if os.path.isdir(path) and f.startswith('gs'):
                     try:
                         val=float(f[2:])
                     except ValueError:
-                        val=0
+                        val=0.0
                     if bestVersion<val:
                         for appName in (
                             'gswin64c.exe',
@@ -91,11 +92,12 @@ class Printer:
         (if relevent to acceptsFormat)
         Available colors are "grey", "rgb", or "rgba" (default=rgba)
         """
-        self._server=None
-        self.name=name
-        self.acceptsFormat=acceptsFormat
-        self.acceptsColors=acceptsColors
-        self.bgColor='#ffffff' # not sure how necessary this is
+        from virtualPrinter.printServer import PrintServer
+        self._server:typing.Optional[PrintServer]=None
+        self.name:str=name
+        self.acceptsFormat:str=acceptsFormat
+        self.acceptsColors:str=acceptsColors
+        self.bgColor:str='#ffffff' # not sure how necessary this is
 
     def printThis(self,
         doc:PrintCallbackDocType,
@@ -134,10 +136,22 @@ class Printer:
         """
         from virtualPrinter.printServer import PrintServer
         self._server=PrintServer(
-            self.name,host,port,autoInstallPrinter,self.printPostscript)
+            self.name,host,port,autoInstallPrinter,self._printServerCallback)
         self._server.run()
         del self._server # delete it so it gets un-registered
         self._server=None
+
+    def _printServerCallback(self,
+        dataSource:PrintCallbackDocType,
+        title:typing.Optional[str]=None,
+        author:typing.Optional[str]=None,
+        filename:typing.Optional[str]=None
+        ):
+        """
+        Default callback, turns around and calls
+        printPostscript() with the data given to it
+        """
+        self.printPostscript(dataSource,False,title,author,filename)
 
     def _postscriptToFormat(self,
         data,
