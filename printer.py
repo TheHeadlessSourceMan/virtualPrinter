@@ -11,7 +11,8 @@ import os
 import sys
 import subprocess
 
-from printServer import PrintCallbackDocType
+from virtualPrinter.printServer import PrintCallbackDocType
+from virtualPrinter.printerException import PrinterException
 
 
 # get the location of ghostscript
@@ -47,7 +48,7 @@ if os.name=='nt':
         errString="""ERR: Ghostscript not found!
             You can get it from:
                 http://www.ghostscript.com"""
-        raise Exception(errString)
+        raise PrinterException(errString)
 else: # assume we can find it
     GHOSTSCRIPT_APP='gs'
 print(f'GHOSTSCRIPT_APP={GHOSTSCRIPT_APP}')
@@ -66,7 +67,7 @@ except ImportError:
     shell_escape=pipes.quote
 
 
-class Printer(object):
+class Printer:
     """
     You can derive from this class to create your own printer!
 
@@ -116,9 +117,8 @@ class Printer(object):
             title='printed'
         if author is not None:
             title=title+' - '+author
-        f=open(shell_escape(title+'.'+self.acceptsFormat),'wb')
-        f.write(doc)
-        f.close()
+        with open(shell_escape(title+'.'+self.acceptsFormat),'wb') as f:
+            f.write(doc)
 
     def run(self,
         host:str='127.0.0.1',
@@ -132,8 +132,8 @@ class Printer(object):
         (currently only supports Windows)
         startServer is required for this
         """
-        import printServer
-        self._server=printServer.PrintServer(
+        from virtualPrinter.printServer import PrintServer
+        self._server=PrintServer(
             self.name,host,port,autoInstallPrinter,self.printPostscript)
         self._server.run()
         del self._server # delete it so it gets un-registered
@@ -154,16 +154,19 @@ class Printer(object):
             http://www.ghostscript.com/doc/current/Devices.htm
             http://www.ghostscript.com/doc/current/Use.htm#Options
         """
-        cmd=[GHOSTSCRIPT_APP,'-q','-sDEVICE='+gsDev]
+        if GHOSTSCRIPT_APP is None:
+            msg="ghostscript is inaccessible. Is it installed?"
+            raise PrinterException(msg)
+        cmd:typing.List[str]=[GHOSTSCRIPT_APP,'-q','-sDEVICE='+gsDev]
         if gsDevOptions is not None:
             cmd.extend(gsDevOptions)
         cmd.extend((r'-sstdout=%stderr','-sOutputFile=-','-dBATCH','-'))
         if outputDebug:
             print(' '.join(cmd))
-        po=subprocess.Popen(cmd,
+        with subprocess.Popen(cmd,
             stdin=subprocess.PIPE,stderr=subprocess.PIPE,
-            stdout=subprocess.PIPE,shell=True)
-        data,gsStdoutStderr=po.communicate(input=data)
+            stdout=subprocess.PIPE,shell=True) as po:
+            data,gsStdoutStderr=po.communicate(input=data)
         if outputDebug:
             # note: stdout also goes to stderr because of
             # the -sstdout=%stderr flag above
@@ -191,9 +194,11 @@ class Printer(object):
             data=sys.stdin.read()
         elif isinstance(datasource,str):
             if datasourceIsFilename:
-                f=open(datasource,'rb')
-                data=f.read()
-                f.close()
+                with open(datasource,
+                    'rb',
+                    encoding='utf-8',
+                    errors='ignore') as f: # noqa: E129
+                    data=f.read()
                 if title is None:
                     title=datasource.rsplit(os.sep,1)[-1].rsplit('.',1)[0]
             else:
@@ -222,11 +227,11 @@ class Printer(object):
                     gsDevOptions.append('-dBackgroundColor=16'+self.bgColor)
             #elif self.acceptsColors=='rgb': #TODO
             else:
-                msg=f'Unacceptable color format "{self.acceptsColors}"'
-                raise Exception(msg)
+                msg=f'Unknown color format "{self.acceptsColors}"'
+                raise PrinterException(msg)
         else:
             msg=r'Unacceptable data type format "{self.acceptsFormat}"'
-            raise Exception(msg)
+            raise PrinterException(msg)
         data=self._postscriptToFormat(data,gsDev,gsDevOptions)
         # -- send the data to the printThis function
         print('Printing data...')
@@ -251,12 +256,13 @@ if __name__=='__main__':
                 p.printPostscript(sys.stdin)
             elif arg.find(os.sep)<0 and len(sys.argv[1].split('.'))>2:
                 # looks like an ip to me!
-                ip=arg.rsplit(':',1)
-                if len(ip)>1:
-                    port=ip[-1]
+                ipPort=arg.rsplit(':',1)
+                port:typing.Union[None,str,int]
+                if len(ipPort)>1:
+                    port=ipPort[-1]
                 else:
                     port=None
-                ip=ip[0]
+                ip=ipPort[0]
                 p.run(ip,port)
             else:
                 p.printPostscript(arg,True)

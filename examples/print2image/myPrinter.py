@@ -5,8 +5,7 @@ A virtual printer device that creates an image file as output
 """
 import typing
 import os
-from printServer import PrintCallbackDocType
-from virtualPrinter import Printer
+from virtualPrinter import Printer,PrintCallbackDocType
 try:
     from PIL import Image
 except ImportError as e:
@@ -43,7 +42,6 @@ class MyPrinter(Printer):
             filename based on this (foo.html -> foo.pdf)
         """
         import tkinter as tk
-        import tkinter.filedialog as filedialog
         tk.Tk().withdraw() # prevent a blank application window
         filetypes=(
             ("PNG Files",'*.png'),
@@ -58,7 +56,7 @@ class MyPrinter(Printer):
             initialdir=originPathFilename[0]
         else:
             initialdir=None
-        val=filedialog.asksaveasfilename(confirmoverwrite=True,
+        val=tk.filedialog.asksaveasfilename(confirmoverwrite=True,
             title='Save As...',defaultextension='.png',filetypes=filetypes,
             initialfile=initialfile,initialdir=initialdir)
         if val is not None and val.strip()!='':

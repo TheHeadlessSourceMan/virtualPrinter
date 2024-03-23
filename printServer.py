@@ -23,7 +23,7 @@ PrintCallbackFunctionType=typing.Callable[[
     ],None
 ]
 
-class PrintServer(object):
+class PrintServer:
     """
     We could use RedMon to redirect a port to a program, but the idea of
     this file is to bypass that.
@@ -79,8 +79,8 @@ class PrintServer(object):
         atexit.register(self.__del__) # ensure that __del__ always
         #                               gets called when the program exits
         if os.name=='nt':
-            import windowsPrinters
-            self.osPrinterManager=windowsPrinters.WindowsPrinters()
+            from .windowsPrinters import WindowsPrinters
+            self.osPrinterManager=WindowsPrinters()
             self.printerPortName=self.printerName+' Port'
             makeDefault=False
             comment='Virtual printer created in Python'
@@ -113,6 +113,7 @@ class PrintServer(object):
             self._installPrinter(ip,port)
         #sock.setblocking(0)
         sock.listen(1)
+        newWay=True
         while self.keepGoing:
             print('\nListening for incoming print job...')
             while self.keepGoing: # let select() yield some time to this thread
@@ -130,14 +131,14 @@ class PrintServer(object):
             _=addr # not used for now
             #        could be interesting for remote prints tho
             if self.printCallbackFn is None:
-                f=open('I_printed_this.ps','wb')
-                while True:
-                    data=conn.recv(self.buffersize)
-                    if not data:
-                        break
-                    f.write(data)
-                    f.flush()
-            elif True:
+                with open('I_printed_this.ps','wb') as f:
+                    while True:
+                        data=conn.recv(self.buffersize)
+                        if not data:
+                            break
+                        f.write(data)
+                        f.flush()
+            elif newWay:
                 buf=[]
                 while True:
                     data=str(conn.recv(self.buffersize))

@@ -8,7 +8,7 @@ import typing
 import subprocess
 
 
-class WindowsPrinters(object):
+class WindowsPrinters:
     """
     Handy convenience class for managing (installing, removing, etc)
     windows printers
@@ -28,10 +28,10 @@ class WindowsPrinters(object):
              r'c:\Windows\System32\Printing_Admin_Scripts\en-US\prnport.vbs',
              '-d','-r',printerPortName]
         print(cmd)
-        po=subprocess.Popen(cmd,
+        with subprocess.Popen(cmd,
             stdin=None,stderr=subprocess.STDOUT,stdout=subprocess.PIPE,
-            shell=True)
-        stdout,_=po.communicate()
+            shell=True) as po:
+            stdout,_=po.communicate()
         print(stdout)
 
     def removePrinter(self,name):
@@ -40,10 +40,10 @@ class WindowsPrinters(object):
         """
         cmd=['rundll32','printui.dll,PrintUIEntry','/dl','/n',name]
         #print(cmd)
-        po=subprocess.Popen(cmd,
+        with subprocess.Popen(cmd,
             stdin=None,stderr=subprocess.STDOUT,stdout=subprocess.PIPE,
-            shell=True)
-        stdout,_=po.communicate()
+            shell=True) as po:
+            stdout,_=po.communicate()
         print(stdout)
 
     def listPorts(self):
@@ -54,10 +54,10 @@ class WindowsPrinters(object):
              r'c:\Windows\System32\Printing_Admin_Scripts\en-US\prnport.vbs',
              '-l']
         #print(cmd)
-        po=subprocess.Popen(cmd,
+        with subprocess.Popen(cmd,
             stdin=None,stderr=subprocess.STDOUT,stdout=subprocess.PIPE,
-            shell=True)
-        stdout,_=po.communicate()
+            shell=True) as po:
+            stdout,_=po.communicate()
         print(stdout)
 
     def makePrinterDefault(self,name):
@@ -66,10 +66,10 @@ class WindowsPrinters(object):
         """
         cmd=['rundll32','printui.dll,PrintUIEntry','/y','/n',name]
         #print(cmd)
-        po=subprocess.Popen(cmd,
+        with subprocess.Popen(cmd,
             stdin=None,stderr=subprocess.STDOUT,stdout=subprocess.PIPE,
-            shell=True)
-        stdout,_=po.communicate()
+            shell=True) as po:
+            stdout,_=po.communicate()
         print(stdout)
 
     def setPrinterComment(self,name:str,comment:str)->None:
@@ -81,10 +81,10 @@ class WindowsPrinters(object):
             '/n',name,
             'comment',comment]
         #print(cmd)
-        po=subprocess.Popen(
+        with subprocess.Popen(
             cmd,stdin=None,stderr=subprocess.STDOUT,stdout=subprocess.PIPE,
-            shell=True)
-        stdout,_=po.communicate()
+            shell=True) as po:
+            stdout,_=po.communicate()
         print(stdout)
 
     def addPrinter(self,
@@ -101,16 +101,16 @@ class WindowsPrinters(object):
         # -- create the printer port
         if printerPortName is None:
             printerPortName=host+':'+port
-        cmd=['cscript',
+        cmd:typing.List[str]=['cscript',
             r'c:\Windows\System32\Printing_Admin_Scripts\en-US\prnport.vbs',
             '-md','-a','-o','raw',
             '-r',printerPortName,
             '-h',host,'-n',port]
         #print(cmd)
-        po=subprocess.Popen(cmd,
+        with subprocess.Popen(cmd,
             stdin=None,stderr=subprocess.STDOUT,stdout=subprocess.PIPE,
-            shell=True)
-        stdout,_=po.communicate()
+            shell=True) as po:
+            stdout,_=po.communicate()
         print(stdout)
         # -- create the printer
         cmd=['rundll32','printui.dll,PrintUIEntry','/if',
@@ -119,10 +119,10 @@ class WindowsPrinters(object):
             '/m',self.defaultPostscriptPrinterDriver,
             '/Z']
         print(cmd)
-        po=subprocess.Popen(cmd,
+        with subprocess.Popen(cmd,
             stdin=None,stderr=subprocess.STDOUT,stdout=subprocess.PIPE,
-            shell=True)
-        stdout,_=po.communicate()
+            shell=True) as po:
+            stdout,_=po.communicate()
         print(stdout)
         # -- set the default printer flag
         if makeDefault:
@@ -140,10 +140,10 @@ class WindowsPrinters(object):
             '/k',
             '/n',name]
         print(cmd)
-        po=subprocess.Popen(cmd,
+        with subprocess.Popen(cmd,
             stdin=None,stderr=subprocess.STDOUT,stdout=subprocess.PIPE,
-            shell=True)
-        stdout,_=po.communicate()
+            shell=True) as po:
+            stdout,_=po.communicate()
         print(stdout)
 
     def showSettingsDialog(self,name:str)->None:
@@ -155,10 +155,10 @@ class WindowsPrinters(object):
             '/e',
             '/n',name]
         print(cmd)
-        po=subprocess.Popen(cmd,
+        with subprocess.Popen(cmd,
             stdin=None,stderr=subprocess.STDOUT,stdout=subprocess.PIPE,
-            shell=True)
-        stdout,_=po.communicate()
+            shell=True) as po:
+            stdout,_=po.communicate()
         print(stdout)
 
     def saveSettings(self,name:str,filename:str)->None:
@@ -174,10 +174,10 @@ class WindowsPrinters(object):
             '/n',name,
             '/a',filename]
         print(cmd)
-        po=subprocess.Popen(cmd,
+        with subprocess.Popen(cmd,
             stdin=None,stderr=subprocess.STDOUT,stdout=subprocess.PIPE,
-            shell=True)
-        stdout,_=po.communicate()
+            shell=True) as po:
+            stdout,_=po.communicate()
         print(stdout)
 
     def loadSettings(self,name,filename):
@@ -193,10 +193,10 @@ class WindowsPrinters(object):
             '/n',name,
             '/a',filename]
         print(cmd)
-        po=subprocess.Popen(
+        with subprocess.Popen(
             cmd,stdin=None,stderr=subprocess.STDOUT,stdout=subprocess.PIPE,
-            shell=True)
-        stdout,_=po.communicate()
+            shell=True) as po:
+            stdout,_=po.communicate()
         print(stdout)
 
     def showPrintUIdllOptions(self):
@@ -204,10 +204,10 @@ class WindowsPrinters(object):
         Show the ui options
         """
         cmd=r'rundll32 PrintUI.dll,PrintUIEntry /?'
-        po=subprocess.Popen(
+        with subprocess.Popen(
             cmd,stdin=None,stderr=subprocess.STDOUT,stdout=subprocess.PIPE,
-            shell=True)
-        stdout,_=po.communicate()
+            shell=True) as po: # nosemgrep
+            stdout,_=po.communicate()
         print(stdout)
         # TODO: it might be cool to do this someday
         #ctypes.windll.PrintUI.PrintUIEntry('/?')

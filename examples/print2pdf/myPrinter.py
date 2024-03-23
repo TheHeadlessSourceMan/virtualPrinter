@@ -5,8 +5,7 @@ A virtual printer device that creates a pdf as output
 """
 import typing
 import os
-from printServer import PrintCallbackDocType
-from virtualPrinter import Printer
+from virtualPrinter import Printer,PrintCallbackDocType
 
 
 class MyPrinter(Printer):
@@ -27,7 +26,6 @@ class MyPrinter(Printer):
             filename based on this (foo.html -> foo.pdf)
         """
         import tkinter as tk
-        import tkinter.filedialog as filedialog
         tk.Tk().withdraw() # prevent a blank application window
         filetypes=(("PDF Files",'*.pdf'),("all files","*.*"))
         if originFilename is None:
@@ -38,7 +36,7 @@ class MyPrinter(Printer):
             initialdir=originPathName[0]
         else:
             initialdir=None
-        val=filedialog.asksaveasfilename(confirmoverwrite=True,
+        val=tk.filedialog.asksaveasfilename(confirmoverwrite=True,
             title='Save As...',defaultextension='.pdf',filetypes=filetypes,
             initialfile=initialfile,initialdir=initialdir)
         if val is not None and val.strip()!='':
@@ -65,9 +63,8 @@ class MyPrinter(Printer):
         val=self.doSaveAsDialog(filename)
         if val is not None:
             print("Saving to:",val)
-            f=open(val,'wb')
-            f.write(doc)
-            f.close()
+            with open(val,'wb') as f:
+                f.write(doc)
         else:
             print("No output filename.  So never mind then, I guess.")
 
