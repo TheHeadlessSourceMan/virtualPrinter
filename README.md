@@ -1,4 +1,4 @@
-[![Pylint](https://github.com/TheHeadlessSourceMan/virtualPrinter/actions/workflows/pylint.yml/badge.svg)](https://github.com/TheHeadlessSourceMan/virtualPrinter/actions/workflows/pylint.yml)
+[![Pylint](https://github.com/TheHeadlessSourceMan/virtualPrinter/actions/workflows/pylint.yml/badge.svg)](https://github.com/TheHeadlessSourceMan/virtualPrinter/actions/workflows/pylint.yml)[![Flake8](https://github.com/TheHeadlessSourceMan/virtualPrinter/actions/workflows/flake8.yml/badge.svg)](https://github.com/TheHeadlessSourceMan/virtualPrinter/actions/workflows/flake8.yml)
 # virtualPrinter
 
 This library allows you to easily create a windows virtual printer.
