@@ -1,3 +1,4 @@
+[![Pylint](https://github.com/TheHeadlessSourceMan/virtualPrinter/actions/workflows/pylint.yml/badge.svg)](https://github.com/TheHeadlessSourceMan/virtualPrinter/actions/workflows/pylint.yml)
 # virtualPrinter
 
 This library allows you to easily create a windows virtual printer.
