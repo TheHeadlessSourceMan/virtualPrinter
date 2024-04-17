@@ -30,7 +30,7 @@ if os.name=='nt':
                 path=gsDir+os.sep+f
                 if os.path.isdir(path) and f.startswith('gs'):
                     try:
-                        val=float(f[2:])
+                        val=float(f[2:7]) # Example: if `f` equals to `gs10.03.0` then `f[2:7]` would give `10.03` which is what we expect.
                     except ValueError:
                         val=0.0
                     if bestVersion<val:
